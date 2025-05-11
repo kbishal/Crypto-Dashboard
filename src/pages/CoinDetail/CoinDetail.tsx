@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  Label
 } from "recharts";
 import { useNavigate } from "react-router-dom";
-
+import { format } from 'd3-format';
 
 interface CoinData {
   name: string;
@@ -74,8 +75,8 @@ const CoinDetail = () => {
         </span>
         <span
           className={`ml-2 font-medium ${coin.market_data.price_change_percentage_24h >= 0
-              ? "text-green-600 dark:text-green-400"
-              : "text-red-600 dark:text-red-400"
+            ? "text-green-600 dark:text-green-400"
+            : "text-red-600 dark:text-red-400"
             }`}
         >
           {coin.market_data.price_change_percentage_24h.toFixed(2)}%
@@ -85,9 +86,32 @@ const CoinDetail = () => {
       {/* Chart */}
       <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <XAxis dataKey="time" stroke="#888"/>
-            <YAxis stroke="#888" domain={["auto", "auto"]} />
+          <LineChart
+            data={chartData}
+            margin={{ top: 10, right: 20, bottom: 40, left: 40 }}
+          >
+            <XAxis dataKey="time" stroke="#888">
+              <Label
+                value="Time"
+                position="bottom"
+                offset={20}
+                className="text-xs fill-gray-500 dark:fill-gray-300"
+              />
+            </XAxis>
+
+            <YAxis
+              stroke="#888"
+              tickFormatter={format(".2s")}
+            >
+              <Label
+                value="Price (USD)"
+                angle={-90}
+                position="left"
+                offset={20}
+                className="text-xs fill-gray-500 dark:fill-gray-300"
+              />
+            </YAxis>
+
             <Tooltip
               contentStyle={{
                 backgroundColor: "#1f2937",
@@ -95,7 +119,9 @@ const CoinDetail = () => {
                 color: "#fff",
               }}
               labelStyle={{ color: "#ccc" }}
+              formatter={(value: number) => `$${value.toFixed(2)}`}
             />
+
             <Line
               type="monotone"
               dataKey="price"
