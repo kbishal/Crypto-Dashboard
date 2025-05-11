@@ -69,79 +69,79 @@ function Dashboard() {
 
   const totalPages = Math.ceil(TOTAL_NUM_OF_COINS / itemsPerPage);
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white px-6 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-        Crypto Dashboard
-      </h1>
+  return (<div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white px-6 py-8">
+  <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+    Crypto Dashboard
+  </h1>
 
-      <input
-        type="text"
-        placeholder="Search by name or symbol"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="block w-full max-w-md mx-auto mb-6 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-300"
-      />
+  <input
+    type="text"
+    placeholder="Search by name or symbol"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="block w-full max-w-md mx-auto mb-6 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+  />
 
-      <div className="overflow-x-auto shadow-lg rounded-lg">
-        <table className="w-full table-auto text-sm">
-          <thead>
-            <tr className="bg-gray-800 text-gray-400">
-              <th className="py-3 px-4 text-left">Name</th>
-              <th className="py-3 px-4 text-left">Price</th>
-              <th className="py-3 px-4 text-left hidden sm:table-cell">24h</th>
-              <th className="py-3 px-4 text-left">24h Volume</th>
-              <th className="py-3 px-4 text-left hidden sm:table-cell">Market Cap</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCoins.map((coin) => (
-              <CoinRow key={coin.id} {...coin} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+  <div className="overflow-x-auto shadow-lg rounded-lg">
+    <table className="w-full table-auto text-sm">
+      <thead>
+        <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
+          <th className="py-3 px-4 text-left">Name</th>
+          <th className="py-3 px-4 text-left">Price</th>
+          <th className="py-3 px-4 text-left hidden sm:table-cell">24h</th>
+          <th className="py-3 px-4 text-left">24h Volume</th>
+          <th className="py-3 px-4 text-left hidden sm:table-cell">Market Cap</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filteredCoins.map((coin) => (
+          <CoinRow key={coin.id} {...coin} />
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-      {/* Pagination */}
+  {/* Pagination */}
+  <div className="flex justify-end items-center flex-wrap gap-2 mt-6">
+    {/* Previous Button */}
+    <button
+      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+      disabled={currentPage === 1}
+      className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
+    >
+      Prev
+    </button>
 
-      <div className="flex justify-end items-center flex-wrap gap-2 mt-6">
-        {/* Previous Button */}
+    {/* Numbered Buttons with Ellipses */}
+    {getPaginationButtons(currentPage, totalPages).map((item, index) =>
+      typeof item === "number" ? (
         <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 rounded text-sm font-medium bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-40"
+          key={index}
+          onClick={() => setCurrentPage(item)}
+          className={`px-3 py-1 rounded text-sm font-medium ${
+            currentPage === item
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+          }`}
         >
-          Prev
+          {item}
         </button>
+      ) : (
+        <span key={index} className="px-2 text-gray-400 select-none">...</span>
+      )
+    )}
 
-        {/* Numbered Buttons with Ellipses */}
-        {getPaginationButtons(currentPage, totalPages).map((item, index) =>
-          typeof item === "number" ? (
-            <button
-              key={index}
-              onClick={() => setCurrentPage(item)}
-              className={`px-3 py-1 rounded text-sm font-medium ${currentPage === item
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-700 text-gray-200 hover:bg-gray-600"
-                }`}
-            >
-              {item}
-            </button>
-          ) : (
-            <span key={index} className="px-2 text-gray-400 select-none">...</span>
-          )
-        )}
+    {/* Next Button */}
+    <button
+      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
+    >
+      Next
+    </button>
+  </div>
+</div>
 
-        {/* Next Button */}
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded text-sm font-medium bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
-    </div>
   );
 }
 
