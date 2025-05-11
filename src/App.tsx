@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import CoinDetail from "./pages/CoinDetail";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import CoinDetail from "./pages/CoinDetail/CoinDetail";
 import { useTheme } from "./context/ThemeContext";
 
 function App() {

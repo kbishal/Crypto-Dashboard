@@ -86,7 +86,7 @@ const CoinDetail = () => {
       <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
-            <XAxis dataKey="time" stroke="#888" />
+            <XAxis dataKey="time" stroke="#888"/>
             <YAxis stroke="#888" domain={["auto", "auto"]} />
             <Tooltip
               contentStyle={{

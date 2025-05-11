@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import CoinRow from "../components/CoinRow";
+import CoinRow from "../../components/CoinRow/CoinRow";
 
 interface Coin {
   id: string;
