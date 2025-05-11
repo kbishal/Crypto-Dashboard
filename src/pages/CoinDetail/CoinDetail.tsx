@@ -7,6 +7,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { format } from 'd3-format';
+import Loader from "../../components/Loader/Loader";
 
 interface CoinData {
   name: string;
@@ -62,7 +63,7 @@ const CoinDetail = () => {
   }, [id, selectedRange]);
 
 
-  if (!coin) return <div className="text-white p-6">Loading...</div>;
+  if (!coin || !chartData) return <div className="h-screen flex items-center justify-center"><Loader/></div>;
 
   return (
     <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white px-6 py-10">

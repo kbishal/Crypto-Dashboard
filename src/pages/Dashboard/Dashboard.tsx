@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CoinRow from "../../components/CoinRow/CoinRow";
+import Loader from "../../components/Loader/Loader";
 
 interface Coin {
   id: string;
@@ -45,6 +46,7 @@ function getPaginationButtons(current: number, total: number, siblings = 1): (nu
 
 function Dashboard() {
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -54,6 +56,7 @@ function Dashboard() {
   const TOTAL_NUM_OF_COINS = 100;
 
   useEffect(() => {
+    setIsLoading(true);
     axios
       .get("https://api.coingecko.com/api/v3/coins/markets", {
         params: {
@@ -65,7 +68,8 @@ function Dashboard() {
         },
       })
       .then((res) => setCoins(res.data))
-      .catch((err) => console.error("Error fetching coins", err));
+      .catch((err) => console.error("Error fetching coins", err))
+      .finally(() => setIsLoading(false))
   }, [currentPage]);
 
   const filteredCoins = coins.filter((coin) =>
@@ -115,47 +119,47 @@ function Dashboard() {
       />
 
       <div className="overflow-x-auto shadow-lg rounded-lg">
-        <table className="w-full table-auto text-sm">
-          <thead>
-            <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
-              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("name")}>Name {getSortIcon("name")}</th>
-              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("current_price")}>Price {getSortIcon("current_price")}</th>
-              <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("price_change_percentage_24h")}>24h {getSortIcon("price_change_percentage_24h")}</th>
-              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("total_volume")}>24h Volume {getSortIcon("total_volume")}</th>
-              <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("market_cap")}>Market Cap {getSortIcon("market_cap")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedCoins.map((coin) => (
-              <CoinRow key={coin.id} {...coin} />
-            ))}
-          </tbody>
-        </table>
+        {isLoading ? (<div className="h-screen flex items-center justify-center"><Loader/></div>)
+          : (<table className="w-full table-auto text-sm">
+            <thead>
+              <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
+                <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("name")}>Name {getSortIcon("name")}</th>
+                <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("current_price")}>Price {getSortIcon("current_price")}</th>
+                <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("price_change_percentage_24h")}>24h {getSortIcon("price_change_percentage_24h")}</th>
+                <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("total_volume")}>24h Volume {getSortIcon("total_volume")}</th>
+                <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("market_cap")}>Market Cap {getSortIcon("market_cap")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedCoins.map((coin) => (
+                <CoinRow key={coin.id} {...coin} />
+              ))}
+            </tbody>
+          </table>)}
       </div>
 
-  {/* Pagination */}
+      {/* Pagination */}
       <div className="flex justify-end items-center flex-wrap gap-2 mt-6">
-    {/* Previous Button */}
-    <button
-      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-      disabled={currentPage === 1}
-      className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
-    >
-      Prev
-    </button>
+        {/* Previous Button */}
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
+        >
+          Prev
+        </button>
 
-    {/* Numbered Buttons with Ellipses */}
+        {/* Numbered Buttons with Ellipses */}
         {getPaginationButtons(currentPage, totalPages).map((item, index) =>
           typeof item === "number" ? (
-        <button
-          key={index}
-          onClick={() => setCurrentPage(item)}
-          className={`px-3 py-1 rounded text-sm font-medium ${
-            currentPage === item
-                ? "bg-blue-600 text-white"
-              : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-          }`}
-        >
+            <button
+              key={index}
+              onClick={() => setCurrentPage(item)}
+              className={`px-3 py-1 rounded text-sm font-medium ${currentPage === item
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+            >
               {item}
             </button>
           ) : (
@@ -163,14 +167,14 @@ function Dashboard() {
           )
         )}
 
-    {/* Next Button */}
-    <button
-      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-      disabled={currentPage === totalPages}
-      className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
-    >
-      Next
-    </button>
+        {/* Next Button */}
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded text-sm font-medium bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40"
+        >
+          Next
+        </button>
       </div>
     </div>
 
