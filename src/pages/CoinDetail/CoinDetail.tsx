@@ -19,10 +19,17 @@ interface CoinData {
   description: { en: string };
 }
 
+const smartPriceFormatter = (value: number): string => {
+  if (value >= 1000) return format("$.2~s")(value).replace(/([kmbtμ])/g, (d) => d.toUpperCase());
+  if (value >= 1) return format("$.2f")(value); // two decimals, no scaling
+  return `$${value.toFixed(4)}`; // small values → fixed precision
+};
+
 const CoinDetail = () => {
   const { id } = useParams();
   const [coin, setCoin] = useState<CoinData | null>(null);
   const [chartData, setChartData] = useState<{ time: string; price: number }[]>([]);
+  const [selectedRange, setSelectedRange] = useState(7);
   const navigate = useNavigate();
 
 
@@ -30,19 +37,30 @@ const CoinDetail = () => {
     axios.get(`https://api.coingecko.com/api/v3/coins/${id}`)
       .then(res => setCoin(res.data))
       .catch(err => console.error("Coin fetch error", err));
+  }, [id]);
 
-    axios.get(`https://api.coingecko.com/api/v3/coins/${id}/market_chart`, {
-      params: { vs_currency: "usd", days: 1 }
-    })
-      .then(res => {
+
+  useEffect(() => {
+    axios
+      .get(`https://api.coingecko.com/api/v3/coins/${id}/market_chart`, {
+        params: { vs_currency: "usd", days: selectedRange },
+      })
+      .then((res) => {
         const formatted = res.data.prices.map((p: [number, number]) => ({
-          time: new Date(p[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          price: p[1]
+          time: new Date(p[0]).toLocaleTimeString([], {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+          }),
+          price: p[1],
         }));
         setChartData(formatted);
       })
-      .catch(err => console.error("Chart fetch error", err));
-  }, [id]);
+      .catch((err) => console.error("Chart fetch error", err));
+  }, [id, selectedRange]);
+
 
   if (!coin) return <div className="text-white p-6">Loading...</div>;
 
@@ -66,22 +84,41 @@ const CoinDetail = () => {
       </div>
 
       {/* Price summary */}
-      <div className="mb-8 text-lg">
-        <span className="text-gray-700 dark:text-gray-300">
-          1 {coin.symbol.toUpperCase()} ={" "}
-        </span>
-        <span className="font-semibold text-xl text-black dark:text-white">
-          ${coin.market_data.current_price.usd.toLocaleString()}
-        </span>
-        <span
-          className={`ml-2 font-medium ${coin.market_data.price_change_percentage_24h >= 0
-            ? "text-green-600 dark:text-green-400"
-            : "text-red-600 dark:text-red-400"
-            }`}
-        >
-          {coin.market_data.price_change_percentage_24h.toFixed(2)}%
-        </span>
+      <div className="mb-8 text-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <span className="text-gray-700 dark:text-gray-300">
+            1 {coin.symbol.toUpperCase()} ={" "}
+          </span>
+          <span className="font-semibold text-xl text-black dark:text-white">
+            ${coin.market_data.current_price.usd.toLocaleString()}
+          </span>
+          <span
+            className={`ml-2 font-medium ${coin.market_data.price_change_percentage_24h >= 0
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400"
+              }`}
+          >
+            {coin.market_data.price_change_percentage_24h.toFixed(2)}%
+          </span>
+        </div>
+
+        {/* Toggle Buttons */}
+        <div className="flex gap-2 text-sm">
+          {[7, 30].map((range) => (
+            <button
+              key={range}
+              onClick={() => setSelectedRange(range)}
+              className={`px-3 py-1 rounded border transition ${selectedRange === range
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white border-gray-400 dark:border-gray-600"
+                }`}
+            >
+              {range} Days
+            </button>
+          ))}
+        </div>
       </div>
+
 
       {/* Chart */}
       <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
@@ -101,7 +138,7 @@ const CoinDetail = () => {
 
             <YAxis
               stroke="#888"
-              tickFormatter={format(".2s")}
+              tickFormatter={smartPriceFormatter}
             >
               <Label
                 value="Price (USD)"
