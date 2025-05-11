@@ -13,6 +13,9 @@ interface Coin {
   price_change_percentage_24h: number;
 }
 
+type SortKey = keyof Pick<Coin, 'name' | 'current_price' | 'price_change_percentage_24h' | 'total_volume' | 'market_cap'>;
+type SortOrder = 'asc' | 'desc' | null;
+
 function getPaginationButtons(current: number, total: number, siblings = 1): (number | string)[] {
   const range: (number | string)[] = [];
   const start = Math.max(2, current - siblings);
@@ -44,6 +47,9 @@ function Dashboard() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+
   const itemsPerPage = 10;
   const TOTAL_NUM_OF_COINS = 100;
 
@@ -67,42 +73,68 @@ function Dashboard() {
     coin.symbol.toLowerCase().includes(search.toLowerCase())
   );
 
+  const sortedCoins = [...filteredCoins].sort((a, b) => {
+    if (!sortKey || !sortOrder) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    return sortOrder === "asc"
+      ? Number(aValue) - Number(bValue)
+      : Number(bValue) - Number(aValue);
+  });
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortOrder(prev => (prev === "asc" ? "desc" : prev === "desc" ? null : "asc"));
+      if (sortOrder === "desc") setSortKey(null); // reset to default
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const totalPages = Math.ceil(TOTAL_NUM_OF_COINS / itemsPerPage);
+  const getSortIcon = (key: SortKey) => {
+    if (sortKey !== key) return "⇅";
+    return sortOrder === "asc" ? "↑" : sortOrder === "desc" ? "↓" : "⇅";
+  };
 
-  return (<div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white px-6 py-8">
-  <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-    Crypto Dashboard
-  </h1>
+  return (
+    <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white px-6 py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Crypto Dashboard</h1>
+      <input
+        type="text"
+        placeholder="Search by name or symbol"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="block w-full max-w-md mx-auto mb-6 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+      />
 
-  <input
-    type="text"
-    placeholder="Search by name or symbol"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    className="block w-full max-w-md mx-auto mb-6 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-300"
-  />
-
-  <div className="overflow-x-auto shadow-lg rounded-lg">
-    <table className="w-full table-auto text-sm">
-      <thead>
-        <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
-          <th className="py-3 px-4 text-left">Name</th>
-          <th className="py-3 px-4 text-left">Price</th>
-          <th className="py-3 px-4 text-left hidden sm:table-cell">24h</th>
-          <th className="py-3 px-4 text-left">24h Volume</th>
-          <th className="py-3 px-4 text-left hidden sm:table-cell">Market Cap</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredCoins.map((coin) => (
-          <CoinRow key={coin.id} {...coin} />
-        ))}
-      </tbody>
-    </table>
-  </div>
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="w-full table-auto text-sm">
+          <thead>
+            <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
+              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("name")}>Name {getSortIcon("name")}</th>
+              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("current_price")}>Price {getSortIcon("current_price")}</th>
+              <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("price_change_percentage_24h")}>24h {getSortIcon("price_change_percentage_24h")}</th>
+              <th className="py-3 px-4 text-left cursor-pointer" onClick={() => toggleSort("total_volume")}>24h Volume {getSortIcon("total_volume")}</th>
+              <th className="py-3 px-4 text-left hidden sm:table-cell cursor-pointer" onClick={() => toggleSort("market_cap")}>Market Cap {getSortIcon("market_cap")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedCoins.map((coin) => (
+              <CoinRow key={coin.id} {...coin} />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
   {/* Pagination */}
-  <div className="flex justify-end items-center flex-wrap gap-2 mt-6">
+      <div className="flex justify-end items-center flex-wrap gap-2 mt-6">
     {/* Previous Button */}
     <button
       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -113,23 +145,23 @@ function Dashboard() {
     </button>
 
     {/* Numbered Buttons with Ellipses */}
-    {getPaginationButtons(currentPage, totalPages).map((item, index) =>
-      typeof item === "number" ? (
+        {getPaginationButtons(currentPage, totalPages).map((item, index) =>
+          typeof item === "number" ? (
         <button
           key={index}
           onClick={() => setCurrentPage(item)}
           className={`px-3 py-1 rounded text-sm font-medium ${
             currentPage === item
-              ? "bg-blue-600 text-white"
+                ? "bg-blue-600 text-white"
               : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
           }`}
         >
-          {item}
-        </button>
-      ) : (
-        <span key={index} className="px-2 text-gray-400 select-none">...</span>
-      )
-    )}
+              {item}
+            </button>
+          ) : (
+            <span key={index} className="px-2 text-gray-400 select-none">...</span>
+          )
+        )}
 
     {/* Next Button */}
     <button
@@ -139,8 +171,8 @@ function Dashboard() {
     >
       Next
     </button>
-  </div>
-</div>
+      </div>
+    </div>
 
   );
 }
