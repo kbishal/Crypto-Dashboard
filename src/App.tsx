@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import CoinDetail from "./pages/CoinDetail/CoinDetail";
 import { useTheme } from "./context/ThemeContext";
+import ErrorBoundaryTest from "./pages/ErrorBoundaryTest/ErrorBoundaryTest";
+import NotFound from "./pages/NotFound/NotFound";
 
 function App() {
   const { theme, toggleTheme } = useTheme();
@@ -27,6 +29,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/coin/:id" element={<CoinDetail />} />
+          <Route path="/error" element={<ErrorBoundaryTest />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </div>

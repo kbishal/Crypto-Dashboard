@@ -155,7 +155,8 @@ function Dashboard() {
             <button
               key={index}
               onClick={() => setCurrentPage(item)}
-              className={`px-3 py-1 rounded text-sm font-medium ${currentPage === item
+          className={`px-3 py-1 rounded text-sm font-medium ${
+            currentPage === item
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
