@@ -95,4 +95,5 @@ Tests are located in the `__tests__` folder and use mocks to avoid hitting the a
 - Pre-commit hooks can be optionally added to enforce linting and formatting.
 - Add internationalization to support various languages, instead of using constant string.
 - Imporve unit test coverage
+- Have BFF architecture, to protect AUTH keys directly getting exposed in case we start using AUTH keys.
 ---
