@@ -10,6 +10,7 @@ It has two main pages:-
 Other handlings added are :-
 `/error` -> A test page to verify the fallback error boundary added in case of failure in component.
 `/*` -> A fallback page if user enter the route which is not supported.
+
 ---
 
 ## Setup Instructions
