@@ -4,12 +4,12 @@ A responsive cryptocurrency dashboard built using React, TypeScript, Tailwind CS
 It displays market data, individual coin details, and a chart of historical price data.
 
 It has two main pages:-
-`/` -> Dashbord
-`/coin/:id` -> Coin detail
+- `/` -> Dashbord
+- `/coin/:id` -> Coin detail
 
 Other handlings added are :-
-`/error` -> A test page to verify the fallback error boundary added in case of failure in component.
-`/*` -> A fallback page if user enter the route which is not supported.
+- `/error` -> A test page to verify the fallback error boundary added in case of failure in component.
+- `/*` -> A fallback page if user enter the route which is not supported.
 
 ---
 
