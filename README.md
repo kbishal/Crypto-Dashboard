@@ -94,4 +94,5 @@ Tests are located in the `__tests__` folder and use mocks to avoid hitting the a
 - Integrate CI/CD pipeline using GitHub Actions to automate testing and linting on every push or pull request.
 - Pre-commit hooks can be optionally added to enforce linting and formatting.
 - Add internationalization to support various languages, instead of using constant string.
+- Imporve unit test coverage
 ---
