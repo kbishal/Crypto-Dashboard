@@ -1,49 +1,8 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import CoinRow from "../../components/CoinRow/CoinRow";
 import Loader from "../../components/Loader/Loader";
 import { fetchCoins } from "../../services/api";
-
-interface Coin {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  current_price: number;
-  market_cap: number;
-  total_volume: number;
-  price_change_percentage_24h: number;
-}
-
-type SortKey = keyof Pick<Coin, 'name' | 'current_price' | 'price_change_percentage_24h' | 'total_volume' | 'market_cap'>;
-type SortOrder = 'asc' | 'desc' | null;
-
-function getPaginationButtons(current: number, total: number, siblings = 1): (number | string)[] {
-  const range: (number | string)[] = [];
-  const start = Math.max(2, current - siblings);
-  const end = Math.min(total - 1, current + siblings);
-
-  range.push(1);
-
-  if (start > 2) {
-    range.push("...");
-  }
-
-  for (let i = start; i <= end; i++) {
-    range.push(i);
-  }
-
-  if (end < total - 1) {
-    range.push("...");
-  }
-
-  if (total > 1) {
-    range.push(total);
-  }
-
-  return range;
-}
-
+import { Coin, ITEMS_PER_PAGE, SortKey, SortOrder, TOTAL_NUM_OF_COINS, getPaginationButtons } from "./Dashboard.util";
 
 function Dashboard() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -53,15 +12,12 @@ function Dashboard() {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
-  const itemsPerPage = 10;
-  const TOTAL_NUM_OF_COINS = 100;
-
   useEffect(() => {
     setIsLoading(true);
-    fetchCoins(currentPage, itemsPerPage)
-    .then(res => setCoins(res.data))
-    .catch(console.error)
-    .finally(() => setIsLoading(false));
+    fetchCoins(currentPage, ITEMS_PER_PAGE)
+      .then(res => setCoins(res.data))
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   }, [currentPage]);
 
   const filteredCoins = coins.filter((coin) =>
@@ -93,7 +49,7 @@ function Dashboard() {
     }
   };
 
-  const totalPages = Math.ceil(TOTAL_NUM_OF_COINS / itemsPerPage);
+  const totalPages = Math.ceil(TOTAL_NUM_OF_COINS / ITEMS_PER_PAGE);
   const getSortIcon = (key: SortKey) => {
     if (sortKey !== key) return "⇅";
     return sortOrder === "asc" ? "↑" : sortOrder === "desc" ? "↓" : "⇅";
@@ -111,7 +67,7 @@ function Dashboard() {
       />
 
       <div className="overflow-x-auto shadow-lg rounded-lg">
-        {isLoading ? (<div className="h-screen flex items-center justify-center"><Loader/></div>)
+        {isLoading ? (<div className="h-screen flex items-center justify-center"><Loader /></div>)
           : (<table className="w-full table-auto text-sm">
             <thead>
               <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
@@ -147,8 +103,7 @@ function Dashboard() {
             <button
               key={index}
               onClick={() => setCurrentPage(item)}
-          className={`px-3 py-1 rounded text-sm font-medium ${
-            currentPage === item
+              className={`px-3 py-1 rounded text-sm font-medium ${currentPage === item
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}

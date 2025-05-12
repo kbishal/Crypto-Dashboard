@@ -5,9 +5,9 @@ import {
   Label
 } from "recharts";
 import { useNavigate } from "react-router-dom";
-import { format } from 'd3-format';
 import Loader from "../../components/Loader/Loader";
 import { fetchCoinDetail, fetchMarketChart } from "../../services/api";
+import { smartPriceFormatter } from "./CoinDetail.util";
 
 interface CoinData {
   name: string;
@@ -19,12 +19,6 @@ interface CoinData {
   image: { large: string };
   description: { en: string };
 }
-
-const smartPriceFormatter = (value: number): string => {
-  if (value >= 1000) return format("$.2~s")(value).replace(/([kmbtμ])/g, (d) => d.toUpperCase());
-  if (value >= 1) return format("$.2f")(value); // two decimals, no scaling
-  return `$${value.toFixed(4)}`; // small values fixed precision
-};
 
 const CoinDetail = () => {
   const { id } = useParams();
