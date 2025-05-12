@@ -9,3 +9,10 @@ if (typeof global.TextEncoder === 'undefined') {
 if (typeof global.TextDecoder === 'undefined') {
   global.TextDecoder = TextDecoder as any;
 }
+
+// Polyfill ResizeObserver
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
