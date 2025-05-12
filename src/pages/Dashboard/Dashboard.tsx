@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import CoinRow from "../../components/CoinRow/CoinRow";
 import Loader from "../../components/Loader/Loader";
+import { fetchCoins } from "../../services/api";
 
 interface Coin {
   id: string;
@@ -57,19 +58,10 @@ function Dashboard() {
 
   useEffect(() => {
     setIsLoading(true);
-    axios
-      .get("https://api.coingecko.com/api/v3/coins/markets", {
-        params: {
-          vs_currency: "usd",
-          order: "market_cap_desc",
-          per_page: itemsPerPage,
-          page: currentPage,
-          sparkline: false,
-        },
-      })
-      .then((res) => setCoins(res.data))
-      .catch((err) => console.error("Error fetching coins", err))
-      .finally(() => setIsLoading(false))
+    fetchCoins(currentPage, itemsPerPage)
+    .then(res => setCoins(res.data))
+    .catch(console.error)
+    .finally(() => setIsLoading(false));
   }, [currentPage]);
 
   const filteredCoins = coins.filter((coin) =>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Label
@@ -8,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { format } from 'd3-format';
 import Loader from "../../components/Loader/Loader";
+import { fetchCoinDetail, fetchMarketChart } from "../../services/api";
 
 interface CoinData {
   name: string;
@@ -23,7 +23,7 @@ interface CoinData {
 const smartPriceFormatter = (value: number): string => {
   if (value >= 1000) return format("$.2~s")(value).replace(/([kmbtμ])/g, (d) => d.toUpperCase());
   if (value >= 1) return format("$.2f")(value); // two decimals, no scaling
-  return `$${value.toFixed(4)}`; // small values → fixed precision
+  return `$${value.toFixed(4)}`; // small values fixed precision
 };
 
 const CoinDetail = () => {
@@ -35,17 +35,14 @@ const CoinDetail = () => {
 
 
   useEffect(() => {
-    axios.get(`https://api.coingecko.com/api/v3/coins/${id}`)
+    fetchCoinDetail(id as string)
       .then(res => setCoin(res.data))
       .catch(err => console.error("Coin fetch error", err));
   }, [id]);
 
 
   useEffect(() => {
-    axios
-      .get(`https://api.coingecko.com/api/v3/coins/${id}/market_chart`, {
-        params: { vs_currency: "usd", days: selectedRange },
-      })
+    fetchMarketChart(id as string, selectedRange)
       .then((res) => {
         const formatted = res.data.prices.map((p: [number, number]) => ({
           time: new Date(p[0]).toLocaleTimeString([], {
@@ -63,7 +60,7 @@ const CoinDetail = () => {
   }, [id, selectedRange]);
 
 
-  if (!coin || !chartData) return <div className="h-screen flex items-center justify-center"><Loader/></div>;
+  if (!coin || !chartData) return <div className="h-screen flex items-center justify-center"><Loader /></div>;
 
   return (
     <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white px-6 py-10">

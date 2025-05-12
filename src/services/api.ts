@@ -1,29 +1,28 @@
 import axios from "axios";
 
-const BASE_URL = "https://api.coingecko.com/api/v3";
+const API_BASE = "https://api.coingecko.com/api/v3";
 
-export const fetchMarketData = () =>
-    axios.get(`${BASE_URL}/coins/markets`, {
+export const fetchCoins = (page = 1, perPage = 10) => {
+    return axios.get(`${API_BASE}/coins/markets`, {
         params: {
             vs_currency: "usd",
             order: "market_cap_desc",
-            per_page: 25,
-            page: 1,
+            per_page: perPage,
+            page,
             sparkline: false,
         },
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-7rkUgSRocXBkqFA9syduTkKq' }
     });
+};
 
-export const fetchCoinDetail = (id: string) =>
-    axios.get(`${BASE_URL}/coins/${id}`, {
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-7rkUgSRocXBkqFA9syduTkKq' }
-    });
+export const fetchCoinDetail = (id: string) => {
+    return axios.get(`${API_BASE}/coins/${id}`);
+};
 
-export const fetchCoinChart = (id: string, days: number = 7) =>
-    axios.get(`${BASE_URL}/coins/${id}/market_chart`, {
+export const fetchMarketChart = (id: string, days: number) => {
+    return axios.get(`${API_BASE}/coins/${id}/market_chart`, {
         params: {
             vs_currency: "usd",
             days,
         },
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-7rkUgSRocXBkqFA9syduTkKq' }
     });
+};
