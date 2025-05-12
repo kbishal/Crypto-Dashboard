@@ -31,7 +31,7 @@ const mockCoins = [
 ];
 
 // Tests
-describe.skip("Dashboard", () => {
+describe("Dashboard", () => {
   beforeEach(() => {
     mockedAxios.get.mockReset();
     mockedAxios.get.mockResolvedValue({ data: mockCoins });
